@@ -31,10 +31,12 @@ except ImportError:
 import os
 
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+if 'OPENAI_API_KEY' == None:
+    OPENAI_API_KEY="ollama"
 if 'BASE_URL' in os.environ:
     BASE_URL = os.environ['BASE_URL']
 else:
-    BASE_URL = None
+    BASE_URL ="http://localhost:11434/v1"
 
 
 class ModelBackend(ABC):
@@ -65,7 +67,10 @@ class OpenAIModel(ModelBackend):
 
     def run(self, *args, **kwargs):
         string = "\n".join([message["content"] for message in kwargs["messages"]])
-        encoding = tiktoken.encoding_for_model(self.model_type.value)
+        try:
+            encoding = tiktoken.encoding_for_model(self.model_type.value)
+        except:
+            encoding=tiktoken.encoding_for_model("gpt-3.5-turbo")
         num_prompt_tokens = len(encoding.encode(string))
         gap_between_send_receive = 15 * len(kwargs["messages"])
         num_prompt_tokens += gap_between_send_receive
@@ -93,6 +98,7 @@ class OpenAIModel(ModelBackend):
                 "gpt-4-turbo": 100000,
                 "gpt-4o": 4096, #100000
                 "gpt-4o-mini": 16384, #100000
+                "codeqwen:7b": 20_000,
             }
             num_max_token = num_max_token_map[self.model_type.value]
             num_max_completion_tokens = num_max_token - num_prompt_tokens
@@ -126,6 +132,7 @@ class OpenAIModel(ModelBackend):
                 "gpt-4-turbo": 100000,
                 "gpt-4o": 4096, #100000
                 "gpt-4o-mini": 16384, #100000
+                "codeqwen:7b": 20_000,
             }
             num_max_token = num_max_token_map[self.model_type.value]
             num_max_completion_tokens = num_max_token - num_prompt_tokens
@@ -177,6 +184,7 @@ class ModelFactory:
 
     @staticmethod
     def create(model_type: ModelType, model_config_dict: Dict) -> ModelBackend:
+        # default_model_type = ModelType.codeqwen7b
         default_model_type = ModelType.GPT_3_5_TURBO
 
         if model_type in {
@@ -188,6 +196,7 @@ class ModelFactory:
             ModelType.GPT_4_TURBO_V,
             ModelType.GPT_4O,
             ModelType.GPT_4O_MINI,
+            ModelType.codeqwen7b,
             None
         }:
             model_class = OpenAIModel
