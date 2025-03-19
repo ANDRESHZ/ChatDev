@@ -61,22 +61,22 @@ class CalculatorGUI(QMainWindow):
         if current_text[-1] in ['+', '-', '*', '/']:
             current_text = current_text[:-1]
         self.input_field.setText(current_text + number)
-    def On_operator_clicked(self, operator):
+    def on_operator_clicked(self, operator):
         current_text = self.input_field.text()
         if current_text[-1].isdigit():
             self.input_field.setText(current_text + operator)
-    def On_power_clicked(self):
+    def on_power_clicked(self):
         current_text = self.input_field.text()
         if current_text[-1].isdigit():
             self.input_field.setText(current_text + '^')
-    def On_trigonometric_function_clicked(self, func):
+    def on_trigonometric_function_clicked(self, func):
         current_text = self.input_field.text()
         if current_text[-1].isdigit():
             self.input_field.setText(current_text + f'{func}(')
-    def On_clear_clicked(self):
+    def on_clear_clicked(self):
         self.input_field.clear()
         self.output_field.clear()
-    def On_calculate_clicked(self):
+    def on_calculate_clicked(self):
         try:
             result = eval(self.input_field.text())
             self.output_field.setText(str(result))
